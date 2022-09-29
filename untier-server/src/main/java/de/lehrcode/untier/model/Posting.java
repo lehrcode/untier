@@ -21,8 +21,8 @@ public class Posting {
     @Column("text")
     private String text;
 
-    @Column("image_id")
-    private Long imageId;
+    @Column("attachment_id")
+    private Long attachmentId;
 
     @Column("published")
     private OffsetDateTime published;

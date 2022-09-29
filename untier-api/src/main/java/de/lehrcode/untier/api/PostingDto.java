@@ -20,7 +20,7 @@ public class PostingDto {
     @Size(max = 400)
     private final String text;
 
-    private final Long imageId;
+    private final Long attachmentId;
 
     @NotNull
     private final OffsetDateTime published;

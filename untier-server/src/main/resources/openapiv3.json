@@ -62,28 +62,9 @@
         "operationId": "publish",
         "requestBody": {
           "content": {
-            "image/gif": {
+            "application/json": {
               "schema": {
-                "type": "string",
-                "format": "binary"
-              }
-            },
-            "image/jpeg": {
-              "schema": {
-                "type": "string",
-                "format": "binary"
-              }
-            },
-            "image/png": {
-              "schema": {
-                "type": "string",
-                "format": "binary"
-              }
-            },
-            "image/webp": {
-              "schema": {
-                "type": "string",
-                "format": "binary"
+                "$ref": "#/components/schemas/DraftPosting"
               }
             },
             "multipart/form-data": {
@@ -91,14 +72,20 @@
                 "type": "object",
                 "properties": {
                   "text": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 400
                   },
-                  "image": {
+                  "attachment": {
                     "type": "string",
                     "format": "binary"
                   }
                 },
-                "required": ["text", "image"]
+                "required": ["text", "attachment"]
+              },
+              "encoding": {
+                "attachment": {
+                  "contentType": "image/gif, image/jpeg, image/png, image/webp"
+                }
               }
             },
             "text/plain": {
@@ -126,7 +113,16 @@
           "403": {
             "description": "failed authentication"
           }
-        }
+        },
+        "security": [
+          {
+            "jwt": [
+              "profile",
+              "email",
+              "offline_access"
+            ]
+          }
+        ]
       }
     },
     "/postings/{id}": {
@@ -187,16 +183,25 @@
           "403": {
             "description": "failed authentication"
           }
-        }
+        },
+        "security": [
+          {
+            "jwt": [
+              "profile",
+              "email",
+              "offline_access"
+            ]
+          }
+        ]
       }
     },
-    "/images/{id}": {
+    "/attachments/{id}": {
       "get": {
         "tags": [
           "QueryService"
         ],
-        "summary": "getImage",
-        "operationId": "getImage",
+        "summary": "getAttachment",
+        "operationId": "getAttachment",
         "parameters": [
           {
             "name": "id",
@@ -229,18 +234,52 @@
   },
   "components": {
     "schemas": {
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "bytes": {
+            "type": "string",
+            "format": "byte"
+          },
+          "mediaType": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "bytes",
+          "mediaType"
+        ]
+      },
+      "DraftPosting": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "attachment": {
+            "$ref": "#/components/schemas/Attachment"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
       "Posting": {
         "type": "object",
         "properties": {
           "author": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 255
           },
           "id": {
             "type": "integer",
             "format": "int64"
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 400
           },
           "published": {
             "type": "string",
@@ -275,7 +314,7 @@
       }
     },
     "securitySchemes": {
-      "oAuthSample": {
+      "jwt": {
         "type": "oauth2",
         "flows": {
           "implicit": {
@@ -299,14 +338,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "oAuthSample": [
-        "profile",
-        "email",
-        "offline_access"
-      ]
-    }
-  ]
+  }
 }

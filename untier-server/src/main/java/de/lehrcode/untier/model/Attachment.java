@@ -7,12 +7,11 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.http.MediaType;
 
 @Data
 @Builder(setterPrefix = "with")
-@Table("images")
-public class Image {
+@Table("attachments")
+public class Attachment {
     @Id
     @Column("id")
     private Long id;

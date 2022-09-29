@@ -7,18 +7,12 @@ import javax.validation.constraints.Size;
 
 public interface AuthoringService {
     @NotNull
-    Long publish(@Size(max = 400) String message,
-                 @Valid Blob blob,
+    Long publish(@Valid DraftPostingDto draftPosting,
                  @NotBlank @Size(min = 1, max = 100) String author);
 
-    default Long publish(@Size(max = 400) String message,
+    default Long publish(@Size(max = 400) String text,
                          @NotBlank @Size(min = 1, max = 100) String author) {
-        return publish(message, null, author);
-    }
-
-    default Long publish(@Valid Blob blob,
-                         @NotBlank @Size(min = 1, max = 100) String author) {
-        return publish(null, blob, author);
+        return publish(DraftPostingDto.builder().withText(text).build(), author);
     }
 
     void retract(@NotNull Long id);

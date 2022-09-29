@@ -90,13 +90,13 @@ public class StatusController {
         JsonPatch patch = Json
             .createPatchBuilder()
             .replace("/info/version", buildProperties.getVersion())
-            .replace("/components/securitySchemes/oAuthSample/flows/implicit/authorizationUrl",
+            .replace("/components/securitySchemes/jwt/flows/implicit/authorizationUrl",
                      untierProperties.getAuthorizationUrl())
-            .replace("/components/securitySchemes/oAuthSample/flows/authorizationCode/authorizationUrl",
+            .replace("/components/securitySchemes/jwt/flows/authorizationCode/authorizationUrl",
                      untierProperties.getAuthorizationUrl())
-            .replace("/components/securitySchemes/oAuthSample/flows/authorizationCode/tokenUrl",
+            .replace("/components/securitySchemes/jwt/flows/authorizationCode/tokenUrl",
                      untierProperties.getTokenUrl())
-            .replace("/components/securitySchemes/oAuthSample/flows/authorizationCode/refreshUrl",
+            .replace("/components/securitySchemes/jwt/flows/authorizationCode/refreshUrl",
                      untierProperties.getTokenUrl())
             .build();
 

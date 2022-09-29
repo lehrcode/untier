@@ -1,9 +1,9 @@
 package de.lehrcode.untier.service;
 
-import de.lehrcode.untier.api.Blob;
+import de.lehrcode.untier.api.AttachmentDto;
 import de.lehrcode.untier.api.PostingDto;
 import de.lehrcode.untier.api.QueryService;
-import de.lehrcode.untier.model.ImageRepository;
+import de.lehrcode.untier.model.AttachmentRepository;
 import de.lehrcode.untier.model.Posting;
 import de.lehrcode.untier.model.PostingRepository;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import org.springframework.validation.annotation.Validated;
 @RequiredArgsConstructor
 public class QueryServiceImpl implements QueryService {
     private final PostingRepository postingRepository;
-    private final ImageRepository imageRepository;
+    private final AttachmentRepository attachmentRepository;
 
     @Override
     public Page<PostingDto> getPostings(Pageable pageable) {
@@ -43,16 +43,17 @@ public class QueryServiceImpl implements QueryService {
                          .withAuthor(posting.getAuthor())
                          .withPublished(posting.getPublished())
                          .withText(posting.getText())
-                         .withImageId(posting.getImageId())
+                         .withAttachmentId(posting.getAttachmentId())
                          .build();
     }
 
     @Override
-    public Optional<Blob> getImage(Long id) {
-        return imageRepository.findById(id)
-                              .map(img -> Blob.builder()
-                                              .withBytes(img.getBytes())
-                                              .withMediaType(img.getMediaType())
-                                              .build());
+    public Optional<AttachmentDto> getAttachment(Long id) {
+        log.debug("getAttachment(id={})", id);
+        return attachmentRepository.findById(id)
+                                   .map(attachment -> AttachmentDto.builder()
+                                                                   .withBytes(attachment.getBytes())
+                                                                   .withMediaType(attachment.getMediaType())
+                                                                   .build());
     }
 }

@@ -1,15 +1,14 @@
 package de.lehrcode.untier.service;
 
 import de.lehrcode.untier.api.AuthoringService;
-import de.lehrcode.untier.api.Blob;
-import de.lehrcode.untier.model.Image;
-import de.lehrcode.untier.model.ImageRepository;
+import de.lehrcode.untier.api.DraftPostingDto;
+import de.lehrcode.untier.model.Attachment;
+import de.lehrcode.untier.model.AttachmentRepository;
 import de.lehrcode.untier.model.Posting;
 import de.lehrcode.untier.model.PostingRepository;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,35 +22,35 @@ import org.springframework.validation.annotation.Validated;
 @RequiredArgsConstructor
 public class AuthoringServiceImpl implements AuthoringService {
     private final PostingRepository postingRepository;
-    private final ImageRepository imageRepository;
+    private final AttachmentRepository attachmentRepository;
 
     @Override
-    public Long publish(String text, Blob blob, String author) {
-        log.debug("publish(text={}, blob={}, author={})", text, blob, author);
-        Long imageId = null;
-        if (blob != null) {
+    public Long publish(DraftPostingDto draftPosting, String author) {
+        log.debug("publish(draftPosting={}, author={})", draftPosting, author);
+        Long attachmentId = null;
+        if (draftPosting.getAttachment() != null) {
             MessageDigest digest;
             try {
                 digest = MessageDigest.getInstance("SHA-256");
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
-            byte[] checksum = digest.digest(blob.getBytes());
-            imageId = imageRepository.findIdByChecksum(checksum).orElseGet(() -> {
-                return imageRepository.save(Image.builder()
-                                                 .withBytes(blob.getBytes())
-                                                 .withChecksum(checksum)
-                                                 .withMediaType(blob.getMediaType())
-                                                 .withCreated(OffsetDateTime.now())
-                                                 .build())
-                                      .getId();
+            byte[] checksum = digest.digest(draftPosting.getAttachment().getBytes());
+            attachmentId = attachmentRepository.findIdByChecksum(checksum).orElseGet(() -> {
+                return attachmentRepository.save(Attachment.builder()
+                                                           .withBytes(draftPosting.getAttachment().getBytes())
+                                                           .withChecksum(checksum)
+                                                           .withMediaType(draftPosting.getAttachment().getMediaType())
+                                                           .withCreated(OffsetDateTime.now())
+                                                           .build())
+                                           .getId();
             });
         }
         return postingRepository.save(Posting.builder()
                                              .withPublished(OffsetDateTime.now())
                                              .withAuthor(author)
-                                             .withImageId(imageId)
-                                             .withText(text)
+                                             .withAttachmentId(attachmentId)
+                                             .withText(draftPosting.getText())
                                              .build())
                                 .getId();
     }

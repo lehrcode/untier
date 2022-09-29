@@ -1,13 +1,13 @@
 package de.lehrcode.untier.web;
 
+import de.lehrcode.untier.api.AttachmentDto;
 import de.lehrcode.untier.api.AuthoringService;
-import de.lehrcode.untier.api.Blob;
+import de.lehrcode.untier.api.DraftPostingDto;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,19 +52,11 @@ public class AuthoringServiceController {
 
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(path = "/postings", consumes = {MediaType.IMAGE_GIF_VALUE,
-                                                 MediaType.IMAGE_JPEG_VALUE,
-                                                 MediaType.IMAGE_PNG_VALUE,
-                                                 "image/webp"})
-    public ResponseEntity<Void> publish(@RequestBody byte[] imageBytes,
-                                        @RequestHeader(HttpHeaders.CONTENT_TYPE) MediaType contentType,
+    @PostMapping(path = "/postings", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> publish(@RequestBody DraftPostingDto draftPosting,
                                         @AuthenticationPrincipal Jwt token) {
-        log.debug("publish(imageBytes=..., token={})", token);
-        Long id = authoringService.publish(Blob.builder()
-                                               .withBytes(imageBytes)
-                                               .withMediaType(String.join("/", contentType.getType(),
-                                                                               contentType.getSubtype()))
-                                               .build(), token.getSubject());
+        log.debug("publish(draftPosting={}, token={})", draftPosting, token);
+        Long id = authoringService.publish(draftPosting, token.getSubject());
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequestUri()
                                                                  .path("/{id}")
                                                                  .build(id))
@@ -76,17 +67,20 @@ public class AuthoringServiceController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/postings", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> publish(@RequestParam("text") String text,
-                                        @RequestParam("image") MultipartFile imageFile,
+                                        @RequestParam("attachment") MultipartFile attachedFile,
                                         @AuthenticationPrincipal Jwt token) throws IOException {
-        log.debug("publish(text={}, imageFile={}, token={})", text, imageFile, token);
-        Blob blob = null;
-        if (imageFile != null && !imageFile.isEmpty()) {
-            blob = Blob.builder()
-                       .withBytes(imageFile.getBytes())
-                       .withMediaType(imageFile.getContentType())
-                       .build();
+        log.debug("publish(text={}, attachedFile={}, token={})", text, attachedFile, token);
+        AttachmentDto attachment = null;
+        if (attachedFile != null && !attachedFile.isEmpty()) {
+            attachment = AttachmentDto.builder()
+                                         .withBytes(attachedFile.getBytes())
+                                         .withMediaType(attachedFile.getContentType())
+                                         .build();
         }
-        Long id = authoringService.publish(StringUtils.trimToNull(text), blob, token.getSubject());
+        Long id = authoringService.publish(DraftPostingDto.builder()
+                                                          .withText(text)
+                                                          .withAttachment(attachment)
+                                                          .build(), token.getSubject());
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequestUri()
                                                                  .path("/{id}")
                                                                  .build(id))

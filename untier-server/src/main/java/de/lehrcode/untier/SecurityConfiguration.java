@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 @EnableGlobalMethodSecurity(prePostEnabled = true,
                             securedEnabled = true,
                             jsr250Enabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http

@@ -38,12 +38,12 @@ public class QueryServiceController {
         return ResponseEntity.of(queryService.getPosting(id));
     }
 
-    @GetMapping(path = "/images/{id:\\d+}")
-    public ResponseEntity<byte[]> getImage(@PathVariable Long id) {
-        return queryService.getImage(id)
-                           .map(img -> ResponseEntity.ok()
-                                                     .contentType(MediaType.parseMediaType(img.getMediaType()))
-                                                     .body(img.getBytes()))
+    @GetMapping(path = "/attachments/{id:\\d+}")
+    public ResponseEntity<byte[]> getAttachment(@PathVariable Long id) {
+        return queryService.getAttachment(id)
+                           .map(a -> ResponseEntity.ok()
+                                                   .contentType(MediaType.parseMediaType(a.getMediaType()))
+                                                   .body(a.getBytes()))
                            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

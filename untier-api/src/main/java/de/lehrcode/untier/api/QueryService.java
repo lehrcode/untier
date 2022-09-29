@@ -19,5 +19,5 @@ public interface QueryService {
     Page<PostingDto> getPostings(@NotNull Pageable pageable);
 
     @NotNull
-    Optional<Blob> getImage(@NotNull Long id);
+    Optional<AttachmentDto> getAttachment(@NotNull Long id);
 }
